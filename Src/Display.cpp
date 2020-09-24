@@ -159,7 +159,7 @@ unsigned int mpal[21];
   3     V   U   H   B   8   G   Y   7
   4     N   O   K   M   0   J   I   9
   5     ,   @   :   .   -   L   P   +
-  6     /   ^   =  SHR HOM  ;   *   £
+  6     /   ^   =  SHR HOM  ;   *   Â£
   7    R/S  Q   C= SPC  2  CTL  <-  1
 */
 
@@ -716,8 +716,13 @@ void C64Display:: Keymap_KeyDown(int symkey,uint8 *key_matrix, uint8 *rev_matrix
 {
 
 	switch (symkey){
+		#ifndef GEKKO
 		case RETROK_F9:	// F9: Invoke SAM
 			SAM(TheC64);
+			else
+		case RETROK_F9:	
+			pauseg=1;
+		#endif
 			break;
 		case RETROK_F10:	// F10: Quit
 			quit_requested = true;
