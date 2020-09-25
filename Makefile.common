@@ -41,14 +41,17 @@ endif
 EMU := $(CORE_DIR)/Src
 GUI := $(CORE_DIR)/libretro/gui
 
+ifneq ($(platform), wii)
 SOURCES_CXX := \
 		$(EMU)/main.cpp $(EMU)/Display.cpp $(EMU)/Prefs.cpp \
 		$(EMU)/SID.cpp $(EMU)/REU.cpp $(EMU)/IEC.cpp $(EMU)/1541fs.cpp \
         $(EMU)/1541d64.cpp $(EMU)/1541t64.cpp $(EMU)/1541job.cpp \
-	
-	ifneq ($(platform), wii)
-SOURCES_CXX += \
-		$(EMU)/SAM.cpp
+	$(EMU)/SAM.cpp
+else
+SOURCES_CXX := \
+		$(EMU)/main.cpp $(EMU)/Display.cpp $(EMU)/Prefs.cpp \
+		$(EMU)/SID.cpp $(EMU)/REU.cpp $(EMU)/IEC.cpp $(EMU)/1541fs.cpp \
+        $(EMU)/1541d64.cpp $(EMU)/1541t64.cpp $(EMU)/1541job.cpp 
 endif
 	
 SLOBJS  := \
