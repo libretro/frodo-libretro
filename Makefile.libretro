@@ -16,6 +16,10 @@ else ifneq ($(findstring win,$(shell uname -s)),)
 endif
 endif
 
+ifeq ($(RS90_TOOLCHAIN),)
+	RS90_TOOLCHAIN = ~/rs90/rs90-toolchain
+endif
+
 ifeq ($(EMUTYPE),)
 	EMUTYPE = frodo
 endif
@@ -38,6 +42,18 @@ ifneq (,$(filter $(platform), unix unix-armv7-hardfloat-neon))
    LDFLAGS += -shared -Wl,--version-script=libretro/link.T
    
    fpic = -fPIC
+else ifeq ($(platform), rs90)
+   CC  = $(RS90_TOOLCHAIN)/bin/mipsel-rs90-linux-musl-gcc
+   CXX = $(RS90_TOOLCHAIN)/bin/mipsel-rs90-linux-musl-g++
+   TARGET := $(TARGET_NAME)_libretro.so
+   SHARED := -L$(RS90_TOOLCHAIN)/lib -shared -Wl,--no-undefined
+   CFLAGS += -DRS90=1 -MMD
+   CFLAGS += -Wall -Wno-unused-variable
+   CFLAGS += -I$(RS90_TOOLCHAIN)/include
+   CFLAGS += -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32
+   fpic   := -fPIC
+   CXXFLAGS += $(CFLAGS)
+   LDFLAGS += -shared -Wl,--gc-sections -Wl,--version-script=$(CORE_DIR)/libretro/link.T
 else ifeq ($(platform), osx)
    TARGET := $(TARGET_NAME)_libretro.dylib
    LDFLAGS += -dynamiclib

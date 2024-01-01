@@ -793,10 +793,18 @@ void C64::VBlank(bool draw_frame)
 #endif
 }
 
+#ifdef RS90
+extern short shiftstate;
+#endif
+
 /*  Poll joystick port, return CIA mask */
 uint8 C64::poll_joystick(int port)
 {
+#ifdef RS90
+   if (SHOWKEY != 1 && shiftstate != 1)
+#else
 	if (SHOWKEY != 1)
+#endif
    {
       uint8 j = 0xff;
       if (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0,
