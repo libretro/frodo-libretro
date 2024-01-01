@@ -236,7 +236,7 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name     = "Frodo";
    info->library_version  = "V4_2";
-   info->valid_extensions = "d64|t64|x64|p00|lnx|zip";
+   info->valid_extensions = "d64|t64|x64|p00|lnx|lyx|zip";
    info->need_fullpath    = true;
    info->block_extract = false;
 
