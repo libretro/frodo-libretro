@@ -196,7 +196,8 @@ void retro_init(void)
 		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2, "R2" },
 		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
 		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" }
+		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
+		{ 0 }
 	};
 	environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, &inputDescriptors);
 #ifndef NO_LIBCO
@@ -235,7 +236,7 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name     = "Frodo";
    info->library_version  = "V4_2";
-   info->valid_extensions = "d64|t64|x64|p00|lnx|zip";
+   info->valid_extensions = "d64|t64|x64|p00|lnx|lyx|zip";
    info->need_fullpath    = true;
    info->block_extract = false;
 
