@@ -122,7 +122,7 @@ else ifeq ($(platform), tvos-arm64)
    fpic := -fPIC
    LDFLAGS += -dynamiclib
    DEFINES := -DIOS
-   COMMONFLAGS += -DHAVE_POSIX_MEMALIGN=1 -marm -DIOS
+   COMMONFLAGS += -DHAVE_POSIX_MEMALIGN=1 -DIOS
 ifeq ($(IOSSDK),)
    IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
 endif
