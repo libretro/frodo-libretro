@@ -56,7 +56,7 @@ else ifeq ($(platform), osx)
 	LDFLAGS += $(ARCHFLAGS)
 else ifeq ($(platform), ios-arm64)
    TARGET := $(TARGET_NAME)_libretro_ios.dylib
-   COMMONFLAGS += -DHAVE_POSIX_MEMALIGN=1 -marm
+   COMMONFLAGS += -DHAVE_POSIX_MEMALIGN=1
    fpic = -fPIC
    LDFLAGS += -dynamiclib
 
