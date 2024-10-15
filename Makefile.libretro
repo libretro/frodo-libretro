@@ -71,6 +71,7 @@ else ifeq ($(platform), ios-arm64)
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
 	CC += -miphoneos-version-min=8.0
 	COMMONFLAGS += -miphoneos-version-min=8.0
+	LDFLAGS += -miphoneos-version-min=8.0
 else ifeq ($(platform), ios)
    TARGET := $(TARGET_NAME)_libretro_ios.dylib
    COMMONFLAGS += -DHAVE_POSIX_MEMALIGN=1 -marm
@@ -128,6 +129,9 @@ ifeq ($(IOSSDK),)
 endif
    CC = cc -arch arm64 -isysroot $(IOSSDK)
    CXX = c++ -arch arm64 -isysroot $(IOSSDK)
+   CC += -mappletvos-version-min=11.0
+   COMMONFLAGS += -mappletvos-version-min=11.0
+   LDFLAGS += -mappletvos-version-min=11.0
 
 else ifeq ($(platform), theos_ios)
 DEPLOYMENT_IOSVERSION = 5.0
