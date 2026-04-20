@@ -1,3 +1,4 @@
+#include <cstring>
 #include <libretro.h>
 #include "libretro-core.h"
 #include "retroscreen.h"
@@ -200,6 +201,7 @@ void Process_key(uint8 *key_matrix, uint8 *rev_matrix, uint8 *joystick)
    }
 }
 
+#ifndef RS90
 int Retro_PollEvent(uint8 *key_matrix, uint8 *rev_matrix, uint8 *joystick)
 {
    //   RETRO        B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
@@ -325,3 +327,135 @@ int Retro_PollEvent(uint8 *key_matrix, uint8 *rev_matrix, uint8 *joystick)
 
    return 1;
 }
+#else
+//copied so less modifications to original code
+static void validkey(int c64_key,int key_up,uint8 *key_matrix,
+					 uint8 *rev_matrix, uint8 *joystick)
+{
+	// Handle other keys
+	bool shifted = c64_key & 0x80;
+	int c64_byte = (c64_key >> 3) & 7;
+	int c64_bit  = c64_key & 7;
+	if (key_up)
+	{
+		if (shifted)
+		{
+			if (key_matrix)
+				key_matrix[6] |= 0x10;
+			if (rev_matrix)
+				rev_matrix[4] |= 0x40;
+		}
+		if (key_matrix)
+			key_matrix[c64_byte] |= (1 << c64_bit);
+		if (rev_matrix)
+			rev_matrix[c64_bit]  |= (1 << c64_byte);
+	}
+	else
+	{
+		if (shifted)
+		{
+			if (key_matrix)
+				key_matrix[6] &= 0xef;
+			if (rev_matrix)
+				rev_matrix[4] &= 0xbf;
+		}
+		if (key_matrix)
+			key_matrix[c64_byte] &= ~(1 << c64_bit);
+		if (rev_matrix)
+			rev_matrix[c64_bit]  &= ~(1 << c64_byte);
+	}
+}
+void kbd_buf_feed(char *s);
+extern bool autoboot;
+#define MATRIX(a,b) (((a) << 3) | (b))
+#define check_key_with_delay(key, array, index, value) \
+	if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, key) ) \
+	{ \
+		array[index]++; \
+		if ( array[index] > 1 ) \
+		{ \
+			validkey(value,0,key_matrix,rev_matrix,joystick); \
+			array[index]=2; \
+		} \
+	} \
+	else \
+	{ \
+		if ( array[index]!=0 ) \
+			validkey(value,1,key_matrix,rev_matrix,joystick); \
+		array[index]=0; \
+	}
+
+int shifted_cursor[7] = {0};
+short shiftstate = 0;
+
+int Retro_PollEvent(uint8 *key_matrix, uint8 *rev_matrix, uint8 *joystick)
+{
+	input_poll_cb();
+
+	//B to show keyboard (mapped to y on rs90)
+
+	if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B) && shiftstate == 0 )
+	{
+		mbt[RETRO_DEVICE_ID_JOYPAD_B]++;
+		if ( mbt[RETRO_DEVICE_ID_JOYPAD_B] > 2 )
+		{
+			SHOWKEY = -SHOWKEY;
+			Screen_SetFullUpdate(0);
+			mbt[RETRO_DEVICE_ID_JOYPAD_B]=0;
+		}
+	}
+	else
+	{
+		mbt[RETRO_DEVICE_ID_JOYPAD_B]=0;
+	}
+
+	if ( SHOWKEY != 1 )
+	{
+	if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START) && shiftstate == 0 )
+	{
+		mbt[RETRO_DEVICE_ID_JOYPAD_START]++;
+		if ( mbt[RETRO_DEVICE_ID_JOYPAD_START] > 2 )
+		{
+			kbd_buf_feed("\rLOAD\":*\",8,1:\rRUN\r\0");
+			autoboot = true;
+		}
+	}
+	else 
+	{
+		mbt[RETRO_DEVICE_ID_JOYPAD_START]=0;
+	}
+
+	check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_SELECT, mbt, RETRO_DEVICE_ID_JOYPAD_SELECT, MATRIX(0, 1));
+	check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_L, mbt, RETRO_DEVICE_ID_JOYPAD_L, MATRIX(7, 7));
+
+	if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R) )
+	{
+		check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_UP, shifted_cursor, 0, MATRIX(0, 7)|0x80);
+		check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_DOWN, shifted_cursor, 1, MATRIX(0, 7))
+		check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_LEFT, shifted_cursor, 2, MATRIX(0, 2)|0x80)
+		check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_RIGHT, shifted_cursor, 3, MATRIX(0, 2));
+		check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_A, shifted_cursor, 4, MATRIX(0, 4));
+		check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_B, shifted_cursor, 5, MATRIX(0, 5));
+		check_key_with_delay(RETRO_DEVICE_ID_JOYPAD_START, shifted_cursor, 6, MATRIX(0, 6));
+		shiftstate = 1;
+	}
+	else if ( shiftstate != 0 )
+	{
+		//yes, this is ugly af, but fast
+		if( shifted_cursor[0] != 0 ) validkey(MATRIX(0, 7)|0x80,1,key_matrix,rev_matrix,joystick);
+		if( shifted_cursor[1] != 0 ) validkey(MATRIX(0, 7),1,key_matrix,rev_matrix,joystick);
+		if( shifted_cursor[2] != 0 ) validkey(MATRIX(0, 2)|0x80,1,key_matrix,rev_matrix,joystick);
+		if( shifted_cursor[3] != 0 ) validkey(MATRIX(0, 2),1,key_matrix,rev_matrix,joystick);
+		if( shifted_cursor[4] != 0 ) validkey(MATRIX(0, 4),1,key_matrix,rev_matrix,joystick);
+		if( shifted_cursor[5] != 0 ) validkey(MATRIX(0, 5),1,key_matrix,rev_matrix,joystick);
+		if( shifted_cursor[6] != 0 ) validkey(MATRIX(0, 6),1,key_matrix,rev_matrix,joystick);
+
+		shifted_cursor[0]=shifted_cursor[1]=shifted_cursor[2]=shifted_cursor[3]=shifted_cursor[4]=shifted_cursor[5]=shifted_cursor[6]=0;
+		shiftstate = 0;
+	}
+	}
+
+   return 1;
+}
+
+#endif
