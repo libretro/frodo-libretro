@@ -184,7 +184,7 @@ else ifeq ($(platform), psp1)
    CC = psp-gcc$(EXE_EXT)
    CXX = psp-g++$(EXE_EXT)
    AR = psp-ar$(EXE_EXT)
-   COMMONFLAGS += -DPSP -G0 -DHAVE_SCANDIR=0 -DHAVE_ALPHASORT=0
+   COMMONFLAGS += -DPSP -G0 -DHAVE_ALPHASORT=0
    COMMONFLAGS += -I$(shell psp-config --pspsdk-path)/include
 	STATIC_LINKING = 1
 # CTR (3DS)

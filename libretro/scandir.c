@@ -39,7 +39,7 @@ int alphasort(const struct dirent **d1, const struct dirent **d2)
 
 #if defined(HAVE_SCANDIR) && !HAVE_SCANDIR
 
-#if defined(WIIU) || defined(VITA) || defined(PSP) || defined(_3DS) || defined (GEKKO)
+#if defined(WIIU) || defined(VITA) || defined(_3DS) || defined (GEKKO)
 int scandir(const char *dirp, struct dirent ***namelist,
               int (*filter)(const struct dirent *),
               int (*compar)(const struct dirent **, const struct dirent **))
